@@ -21,6 +21,8 @@ Usage
 
 
 
+`find data/Exom/ -name *.xlsx -exec python OGTtoPED.py \{\} \{\}.ped \;``
+
 Installation and dependencies
 -----------------------------
 
