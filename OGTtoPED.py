@@ -3,15 +3,21 @@ from openpyxl import load_workbook
 
 # CLI
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="convert OGT sample sheet to PED file")
 
 parser.add_argument("orderform", help="OGT order form containing sample IDs, affectedness status and family grouping.")
+parser.add_argument("outfile", help="Output PED file", nargs='?')
 parser.add_argument("-D", "--debug", help="Enable DEBUG output.", action="store_true")
 
 args = parser.parse_args()
 
 if args.debug:
     print >> sys.stderr, "DEBUG output turned on."
+
+if args.outfile is not None:
+    out = open(args.outfile, 'w')
+else:
+    out = sys.stderr
 
 # Open workbook
 
@@ -21,10 +27,10 @@ ws = wb.active
 # sanity checks
 
 if ws.title != "material form": 
-    print "WARNING: Non standard active sheet name ", ws.title 
+    print >> sys.stderr, "WARNING: Non standard active sheet name ", ws.title 
 
 if ws['B12'].value != "Customer Sample ID" or ws['M12'].value != "Additional Experimental Comments" or ws['C12'].value != "Source (cells, tissue etc)":
-    print "Unexpected table / cell layout: check to see that sheet is ok, and ask to have the script updated. :-)" 
+    print >> sys.stderr, "Unexpected table / cell layout: check to see that sheet is ok, and ask to have the script updated. :-)" 
     exit(1)
 
 
@@ -164,7 +170,7 @@ def print_family(family, family_count):
         else:
             affected_status = 1
 
-        print "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(familyID, sample.sampleID, sample.fatherID, sample.motherID, sample.sex, affected_status,tissue)
+        print >> out, "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(familyID, sample.sampleID, sample.fatherID, sample.motherID, sample.sex, affected_status,tissue)
 
 for rownum in range(1,max_rows+1):
     cell=ws["B" + str(rownum)]
