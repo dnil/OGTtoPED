@@ -103,6 +103,7 @@ def update_family(family):
         if sample.info.find("woman") != -1:
             sample.sex = 2
 
+    # to avoid unpleasantness, just give unset people parentIDs =0 (grandmothers, cousins, tissues, etc..)
     if mother is None:
         motherID = 0
     else:
@@ -112,39 +113,29 @@ def update_family(family):
         fatherID = 0
     else: 
         fatherID = father.sampleID
-                
+
+    # singletons have mother, father IDs = 0 regardles
+    if len(family) == 1:
+        fatherID = 0
+        motherID = 0
+
    # then, print parent ids on all kids
     for sample in family:
-        if sample.info.find("child") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID            
-        elif sample.info.find("brother") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID
+        sample.motherID = motherID
+        sample.fatherID = fatherID
+
+        if sample.info.find("brother") != -1:
             sample.sex = 1
         elif sample.info.find("sister") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID
             sample.sex = 2
         elif sample.info.find("daughter") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID
             sample.sex = 2
         elif sample.info.find("son") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID
             sample.sex = 1
-        elif sample.info.find("foetus") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID
-        elif sample.info.find("sibling") != -1:
-            sample.motherID = motherID
-            sample.fatherID = fatherID
+#        if sample.info.find("child") != -1:
+ #       elif sample.info.find("foetus") != -1:
+#        elif sample.info.find("sibling") != -1:
 
-    # singletons have mother, father IDs = 0
-    if len(family) == 1:
-        sample.motherID = 0
-        sample.fatherID = 0
 
 def print_family(family, family_count):
 
