@@ -3,6 +3,8 @@ OGTtoPED
 
 Import OGT sample information workbook in Excel format, and extract affectedness status and basic family ped info for sample IDs.
 
+(c) Daniel Nilsson, 2015. Made available under the Artistic license v2.0.
+
 Usage
 -----
 
