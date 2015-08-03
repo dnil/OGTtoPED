@@ -72,9 +72,6 @@ def update_family(family):
 
     # first, determine parents
     for sample in family:
-
-        # note that grandmothers and grandfathers will be marked as mother and father..
-
         if sample.info.find("mother") != -1:
             sample.motherID = 0
             sample.fatherID = 0
@@ -90,14 +87,62 @@ def update_family(family):
             father = sample
             if args.debug:
                 print >> sys.stderr, "found father {}".format(father.sampleID)
-    
-        if sample.info.find("male") != -1:
+
+    # to avoid unpleasantness, just give unset people parentIDs =0 (grandmothers, cousins, tissues, etc..)
+
+    if mother is None:
+        motherID = 0        
+    else:
+        motherID = mother.sampleID
+
+    if father is None:
+        fatherID = 0
+    else:
+        fatherID = father.sampleID
+
+    # note that grandmothers and grandfathers will be marked as mother and father..
+
+    # singletons have mother, father IDs = 0 regardles
+    if len(family) == 1:
+        fatherID = 0
+        motherID = 0
+
+   # then, print parent ids on all kids
+    for sample in family:
+        child = False
+
+        if sample.info.find("brother") != -1:
             sample.sex = 1
-
-        if sample.info.find("girl") != -1:
+            child = True
+        elif sample.info.find("sister") != -1:
             sample.sex = 2
+            child = True
+        elif sample.info.find("daughter") != -1:
+            sample.sex = 2
+            child = True
+        elif sample.info.find("son") != -1:
+            sample.sex = 1
+            child = True
+        elif sample.info.find("child") != -1:
+            child = True
+        elif sample.info.find("foetus") != -1:
+            child = True
+        elif sample.info.find("sibling") != -1:
+            child = True
+        elif sample.info.find("boy") != -1:
+            sample.sex = 1
+            child = True
+        elif sample.info.find("girl") != -1:
+            sample.sex = 2
+            child = True
 
-        if sample.info.find("boy") != -1:
+        # update parent id for child or anyone who is not the mother or father
+        assert(sample is not None)
+        if child or (not child and sample is not mother and sample is not father):
+            sample.motherID = motherID
+            sample.fatherID = fatherID
+
+        if sample.info.find("male") != -1:
             sample.sex = 1
 
         if sample.info.find("female") != -1:
@@ -109,40 +154,6 @@ def update_family(family):
         if sample.info.find("woman") != -1:
             sample.sex = 2
 
-    # to avoid unpleasantness, just give unset people parentIDs =0 (grandmothers, cousins, tissues, etc..)
-    if mother is None:
-        motherID = 0
-    else:
-        motherID = mother.sampleID
-
-    if father is None:
-        fatherID = 0
-    else: 
-        fatherID = father.sampleID
-
-    # singletons have mother, father IDs = 0 regardles
-    if len(family) == 1:
-        fatherID = 0
-        motherID = 0
-
-   # then, print parent ids on all kids
-    for sample in family:
-        sample.motherID = motherID
-        sample.fatherID = fatherID
-
-        if sample.info.find("brother") != -1:
-            sample.sex = 1
-        elif sample.info.find("sister") != -1:
-            sample.sex = 2
-        elif sample.info.find("daughter") != -1:
-            sample.sex = 2
-        elif sample.info.find("son") != -1:
-            sample.sex = 1
-#        if sample.info.find("child") != -1:
- #       elif sample.info.find("foetus") != -1:
-#        elif sample.info.find("sibling") != -1:
-
-
 def print_family(family, family_count):
 
     # determine family id - ideally, sampleID of the first affected child
@@ -150,10 +161,9 @@ def print_family(family, family_count):
 
     if len(family) == 1:
         familyID = family[0].sampleID
-
     else:
         for sample in family:
-            if sample.affected and sample.motherID != 0 and sample.fatherID != 0: 
+            if sample.affected and (sample.motherID != 0 or sample.fatherID != 0): 
                 familyID = sample.sampleID
                 break
 
@@ -163,6 +173,10 @@ def print_family(family, family_count):
             if sample.affected:
                 familyID = sample.sampleID
                 break
+
+    # ok, worst case, just name the family after the first sample.
+    if familyID == family_count:
+        familyID = family[0].sampleID
 
     for sample in family:
         if sample.affected:
