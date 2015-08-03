@@ -41,13 +41,13 @@ class Sample:
             print >> sys.stderr, "Sample created with id {} info {} and tissue {}".format(self.sampleID, self.info, self.tissue)
 
         # assume unknown sex
-        self.sex = 0 
+        self.sex = 0
 
-        if self.info.find("affected") != -1:            
+        self.affected = False
+        if self.info.find("affected") != -1:
             if self.info.find("unaffected") == -1:
                 self.affected = True
-        else:
-            self.affected = False
+
         #family nr?
 
 # iterate over all rows, parse row blocks 
@@ -112,8 +112,8 @@ def update_family(family):
         fatherID = 0
     else: 
         fatherID = father.sampleID
-    
-   # then, imprint parent ids on all kids
+                
+   # then, print parent ids on all kids
     for sample in family:
         if sample.info.find("child") != -1:
             sample.motherID = motherID
@@ -141,6 +141,11 @@ def update_family(family):
             sample.motherID = motherID
             sample.fatherID = fatherID
 
+    # singletons have mother, father IDs = 0
+    if len(family) == 1:
+        sample.motherID = 0
+        sample.fatherID = 0
+
 def print_family(family, family_count):
 
     # determine family id - ideally, sampleID of the first affected child
@@ -148,6 +153,7 @@ def print_family(family, family_count):
 
     if len(family) == 1:
         familyID = family[0].sampleID
+
     else:
         for sample in family:
             if sample.affected and sample.motherID != 0 and sample.fatherID != 0: 
@@ -206,6 +212,7 @@ for rownum in range(1,max_rows+1):
             
             if sample.info.find("singleton") != -1:          
                 # found a singleton!
+                sample.affected = True
                 update_family(family)
                 print_family(family, family_count)
                 # this ends the current family.
