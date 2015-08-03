@@ -1,4 +1,4 @@
-import argparse
+import argparse, sys
 from openpyxl import load_workbook
 
 # CLI
@@ -88,6 +88,12 @@ def update_family(family):
         if sample.info.find("male") != -1:
             sample.sex = 1
 
+        if sample.info.find("girl") != -1:
+            sample.sex = 2
+
+        if sample.info.find("boy") != -1:
+            sample.sex = 1
+
         if sample.info.find("female") != -1:
             sample.sex = 2
 
@@ -161,7 +167,7 @@ def print_family(family, family_count):
         else:
             affected_status = 1
 
-        print "{}\t{}\t{}\t{}\t{}\t{}".format(familyID, sample.sampleID, sample.fatherID, sample.motherID, sample.sex, affected_status)
+        print "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(familyID, sample.sampleID, sample.fatherID, sample.motherID, sample.sex, affected_status,tissue)
 
 for rownum in range(1,max_rows+1):
     cell=ws["B" + str(rownum)]
@@ -184,10 +190,14 @@ for rownum in range(1,max_rows+1):
 
             info_cell = ws["M" + str(rownum)]
             info = info_cell.value
+            if info is None:
+                info = "NA"
             info.rstrip()
 
             tissue_cell =  ws["C" + str(rownum)]
             tissue = tissue_cell.value
+            if tissue is None:
+                tissue = "NA"
             tissue.rstrip()
 
             sample = Sample(sample_id, info, tissue)            
